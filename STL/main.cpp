@@ -44,10 +44,13 @@ void main()
 	}
 	cout << endl;
 	vector_info(vec);
+
 	vec.reserve(15);
 	vector_info(vec);
+
 	vec.shrink_to_fit();
 	vector_info(vec);
+
 	vec.resize(8);
 	for (std::vector<int>::iterator it = vec.begin(); it != vec.end(); ++it)
 	{
@@ -55,6 +58,7 @@ void main()
 	}
 	cout << endl;
 	vector_info(vec);
+
 	vec.resize(14);
 	for (int i : vec)cout << i << tab; cout << endl;
 	vector_info(vec);
