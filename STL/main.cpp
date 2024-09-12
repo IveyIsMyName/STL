@@ -14,6 +14,7 @@ template<typename T>void vector_info(const std::vector<T>& vec);
 
 //#define STL_ARRAY
 //#define STL_VECTOR
+#define STL_LIST
 
 void main()
 {
@@ -60,27 +61,38 @@ void main()
 	cout << endl;
 	vector_info(vec);
 
-	vec.resize(14);
+	//vec.resize(14);
 	for (int i : vec)cout << i << tab; cout << endl;
 	vector_info(vec);
 
-	int index;
-	int value;
-	cout << "Введите индекс добавляемого элемента: "; cin >> index;
-	cout << "Введите значение добавляемого элемента: "; cin >> value;
-
-	if (index >= 0 && index <= vec.size())vec.insert(vec.begin() + index, value);
-	else cout << "Индекс вне диапазона!" << endl;
+	vec.insert(vec.begin() + 4, { 1024, 2048, 3072, 4096 });
 	for (int i : vec)cout << i << tab; cout << endl;
 
+	int index;
+	int count;
+	int value;
+	cout << "Введите индекс добавляемого элемента: "; cin >> index;
+	cout << "Введите количество добавляемых элементов: "; cin >> count;
+	cout << "Введите значение добавляемого элемента: "; cin >> value;
+
+	if (index >= 0 && index <= vec.size())vec.insert(vec.begin() + index, count, value);
+	else cout << "Индекс вне диапазона!" << endl;
+	for (int i : vec)cout << i << tab; cout << endl;
+	vec_info(vec);
+
 	cout << "Введите индекс удаляемого элемента: "; cin >> index;
-	if (index >= 0 && index <= vec.size())vec.erase(vec.begin() + index);
+	cout << "Введите количество удаляемых элементов: "; cin >> count;
+	if (index >= 0 && index <= vec.size())vec.erase(vec.begin() + index, vec.begin() + index + count);
 	else cout << "Индекс вне диапазона!" << endl;
 	for (int i : vec)cout << i << tab; cout << endl;
 	
 #endif // STL_VECTOR	
+
+#ifdef STL_LIST
 	std::list<int> list = { 0, 1, 1, 2, 3, 5, 8, 13, 21, 34 };
 	for (int i : list)cout << i << tab; cout << endl;
+	cout << list.front() << endl;
+	cout << list.back() << endl;
 
 	int index;
 	int value;
@@ -112,6 +124,8 @@ void main()
 	}
 	for (int i : list)cout << i << tab; cout << endl;
 }
+#endif // STL_LIST
+
 template<typename T>void vector_info(const std::vector<T>& vec)
 {
 	cout << "Size:    " << vec.size() << endl;
