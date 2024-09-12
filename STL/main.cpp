@@ -2,6 +2,7 @@
 #include<array>
 #include<vector>
 #include<list>
+
 using std::cin;
 using std::cout;
 using std::endl;
@@ -12,7 +13,7 @@ using std::endl;
 template<typename T>void vector_info(const std::vector<T>& vec);
 
 //#define STL_ARRAY
-#define STL_VECTOR
+//#define STL_VECTOR
 
 void main()
 {
@@ -62,7 +63,54 @@ void main()
 	vec.resize(14);
 	for (int i : vec)cout << i << tab; cout << endl;
 	vector_info(vec);
+
+	int index;
+	int value;
+	cout << "Введите индекс добавляемого элемента: "; cin >> index;
+	cout << "Введите значение добавляемого элемента: "; cin >> value;
+
+	if (index >= 0 && index <= vec.size())vec.insert(vec.begin() + index, value);
+	else cout << "Индекс вне диапазона!" << endl;
+	for (int i : vec)cout << i << tab; cout << endl;
+
+	cout << "Введите индекс удаляемого элемента: "; cin >> index;
+	if (index >= 0 && index <= vec.size())vec.erase(vec.begin() + index);
+	else cout << "Индекс вне диапазона!" << endl;
+	for (int i : vec)cout << i << tab; cout << endl;
+	
 #endif // STL_VECTOR	
+	std::list<int> list = { 0, 1, 1, 2, 3, 5, 8, 13, 21, 34 };
+	for (int i : list)cout << i << tab; cout << endl;
+
+	int index;
+	int value;
+	cout << "Введите индекс добавляемого элемента: "; cin >> index;
+	cout << "Введите значение добавляемого элемента: "; cin >> value;
+
+	if (index >= 0 && index <= list.size())
+	{
+		std::list<int>::iterator it = list.begin(); //инициализируем итератор
+		std::advance(it, index); //Перемещаем итератор на нужный индекс
+		list.insert(it, value);
+	}
+	else
+	{
+		cout << "Индекс вне диапазона!" << endl;
+	}
+	for (int i : list)cout << i << tab; cout << endl;
+
+	cout << "Введите индекс удаляемого элемента: "; cin >> index;
+	if (index >= 0 && index <= list.size())
+	{
+		std::list<int>::iterator it = list.begin();
+		std::advance(it, index); //Перемещаем итератор на нужный индекс
+		list.erase(it);
+	}
+	else
+	{
+		cout << "Индекс вне диапазона!" << endl;
+	}
+	for (int i : list)cout << i << tab; cout << endl;
 }
 template<typename T>void vector_info(const std::vector<T>& vec)
 {
