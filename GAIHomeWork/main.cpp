@@ -1,4 +1,5 @@
 ﻿#include<iostream>
+#include<fstream>
 #include<map>
 #include<vector>
 
@@ -66,6 +67,38 @@ public:
 		}
 		cout << delimiter << endl;
 	}
+	void save(const std::string& file)
+	{
+		std::ofstream fout(file);
+		for (const auto& entry: violationsMap)
+		{
+			fout << entry.first << tab;
+			for (const auto& violation : entry.second)
+			{
+				fout << " - " << violation << endl;
+			}
+			fout << endl;
+		}
+		fout.close();
+		std::string command = "notepad ";
+		command += file;
+		system(command.c_str());
+	}
+	void load(const std::string& file)
+	{
+		std::ifstream fin(file);
+		if (fin.is_open())
+		{
+			while (!fin.eof())
+			{
+				const int SIZE = 1024;
+				char buffer[SIZE]{};
+				fin.getline(buffer, SIZE);
+				cout << buffer << endl;
+			}
+			fin.close();
+		}
+	}
 };
 
 void main()
@@ -80,7 +113,9 @@ void main()
 	database.addViolation("П873ЗЖ", "Превышение скорости");
 	database.addViolation("О394ГИ", "Вождение без прав");
 	
-	database.printDatabase();
-	database.printForCar("В456НУ");
-	database.printInRange("В456НУ", "П873ЗЖ");
+	//database.printDatabase();
+	//database.printForCar("В456НУ");
+	//database.printInRange("В456НУ", "П873ЗЖ");
+	//database.save("base.txt");
+	database.load("base.txt");
 }
