@@ -67,6 +67,11 @@ public:
 		strftime(formatted, SIZE, "%R %e.%m.%Y", &time);
 		return formatted;
 	}
+	const time_t get_timestamp()const
+	{
+		tm copy = time;
+		return mktime(&copy);
+	}
 	/*void set_licence_plate(const std::string& license_plate)
 	{
 		this->license_plate = license_plate;
@@ -130,7 +135,7 @@ std::ostream& operator<<(std::ostream& os, const Crime& obj)
 }
 std::ofstream& operator<<(std::ofstream& ofs, const Crime& obj)
 {
-	ofs << obj.get_time() << ":\t " << obj.get_place() << " - " << obj.get_violation();
+	ofs << obj.get_violation_id()<< " " << obj.get_timestamp() << "  " << obj.get_place();
 	return ofs;
 }
 
@@ -161,12 +166,14 @@ void save(const std::map<std::string, std::list<Crime>>& base, const std::string
 	std::ofstream fout(file);
 	for (std::map<std::string, std::list<Crime>>::const_iterator it = base.begin(); it != base.end(); ++it)
 	{
-		fout << it->first << ":\n";
+		fout << it->first << ":\t";
 		for (std::list<Crime>::const_iterator const_it = it->second.begin(); const_it != it->second.end(); ++const_it)
 		{
-			fout << "\t" << *const_it << endl;
+			fout << *const_it << ",";
 		}
-		fout << endl;
+		fout.seekp(-1, std::ios::cur); //Метод seekp(offset, direction) задает позицию курсора записи (p - put)
+		// -1 - смещение  на 1 символ обратно, std::ios::cur - показывает что смещение производится от текущей позиции курсора
+		fout << ";\n";
 	}
 	fout.close();
 	std::string command = "notepad ";
