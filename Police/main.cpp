@@ -15,6 +15,23 @@ using std::endl;
 #define tab "\t"
 #define delimiter "\n------------------------------------------------------------------------\n"
 
+#define Enter 13
+#define Escape 27
+#define UP_ARROW 72
+#define DOWN_ARROW 80
+
+const char* MENU_ITEMS[] =
+{
+	"1. Загрузить базу из файла",
+	"2. Сохранить базу в файл",
+	"3. Вывести базу на экран",
+	"4. Вывести информацию по номеру",
+	"5. Добавить нарушение",
+};
+//const std::map<int, std::string>MENU_ITEMS =
+//{
+//	{1, ""}
+//}
 const std::map<int, std::string> VIOLATIONS =
 {
 	{1, "Ремень безопасности"},
@@ -34,6 +51,7 @@ const std::map<int, std::string> VIOLATIONS =
 	{15, "Превышение максимальной нагрузки на ось"},
 	{16, "Перевозка ребенка без кресла"},
 };
+const int MENU_SIZE = sizeof(MENU_ITEMS) / sizeof(MENU_ITEMS[0]);
 
 class Crime
 {
@@ -147,33 +165,76 @@ std::istream& operator>>(std::istream& is, Crime& obj)
 	}
 	return is;
 }
+
+int menu();
 void print(const std::map<std::string, std::list<Crime>>& base);
 void save(const std::map<std::string, std::list<Crime>>& base, const std::string& file);
 //void load(std::map<std::string, std::list<Crime>>& base, const std::string file);
 std::map<std::string, std::list<Crime>> load(const std::string& file);
 
+//#define LOAD_CHECK
 void main()
 {
 	setlocale(LC_ALL, "");
+#ifdef LOAD_CHECK
 	/*Crime crime(1, "Ул. Ленина", "18:10 1.09.2024");
-	cout << crime << endl;*/
+cout << crime << endl;*/
 
-	/*std::map<std::string, std::list<Crime>> base =
-	{
-		{"a777bb", {Crime(1, "Ул. Ленина", "18:10 1.09.2024"), Crime(2, "пл. Свободы", "12:25 20.08.2024")}},
-		{"a000bb", {Crime(6, "Ул. Космонавтов", "17:50 1.08.2024"), Crime(8, "ул. Космонавтов", "17:45 01.08.2024")}},
-		{"a001aa", {Crime(10, "Ул. Пролетарская", "21:50 1.08.2024"), Crime(9, "Ул. Пролетарская", "21:51 1.08.2024"), Crime(11, "Ул. Пролетарская", "21:51 1.08.2024"), Crime(12, "Ул. Пролетарская", "22:05 1.08.2024")}},
-	};*/
-	
-	//print(base);
-	//load(base, "base.txt");
-	//print(base);
+/*std::map<std::string, std::list<Crime>> base =
+{
+	{"a777bb", {Crime(1, "Ул. Ленина", "18:10 1.09.2024"), Crime(2, "пл. Свободы", "12:25 20.08.2024")}},
+	{"a000bb", {Crime(6, "Ул. Космонавтов", "17:50 1.08.2024"), Crime(8, "ул. Космонавтов", "17:45 01.08.2024")}},
+	{"a001aa", {Crime(10, "Ул. Пролетарская", "21:50 1.08.2024"), Crime(9, "Ул. Пролетарская", "21:51 1.08.2024"), Crime(11, "Ул. Пролетарская", "21:51 1.08.2024"), Crime(12, "Ул. Пролетарская", "22:05 1.08.2024")}},
+};*/
+
+//print(base);
+//load(base, "base.txt");
+//print(base);
 
 	std::map<std::string, std::list<Crime>> crime_map = load("base.txt");
 
 	print(crime_map);
-}
+#endif // LOAD_CHECK
 
+	do
+	{
+		switch (menu())
+		{
+
+		}
+	} while (true);
+}
+int menu()
+{
+	int selected_item = 1;
+	char key;
+	do
+	{
+		system("CLS");
+		for (int i = 0; i < MENU_SIZE; i++)
+		{
+			cout << (i == selected_item ? "[" : " ");
+			cout.width(32);
+			cout << std::left;
+			cout << MENU_ITEMS[i];
+			cout << (i == selected_item ? "]" : " ");
+			cout << endl;
+		}
+		key = _getch();
+		switch (key)
+		{
+		case UP_ARROW: 
+			if (selected_item > 0)selected_item--; break;
+		case DOWN_ARROW: 
+			if (selected_item < MENU_SIZE - 1) selected_item++; break;
+		case Enter: 
+			return selected_item + 1;
+		case Escape:
+			return 0;
+		}
+	} while (key != Escape);
+	return 0;
+}
 void save(const std::map<std::string, std::list<Crime>>& base, const std::string& file)
 {
 	std::ofstream fout(file);
