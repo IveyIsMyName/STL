@@ -37,15 +37,11 @@ const std::map<int, std::string> VIOLATIONS =
 
 class Crime
 {
-	//std::string license_plate;
 	int id;
 	std::string place;
 	tm time;
 public:
-	/*const std::string& get_licence_plate()const
-	{
-		return license_plate;
-	}*/
+	
 	int get_violation_id()const
 	{
 		return id;
@@ -60,9 +56,7 @@ public:
 	}
 	const std::string get_time()const
 	{
-		/*std::string result = asctime(&time);
-		result.pop_back();
-		return result;*/
+		
 		const int SIZE = 256;
 		char formatted[SIZE]{};
 		strftime(formatted, SIZE, "%R %e.%m.%Y", &time);
@@ -73,10 +67,6 @@ public:
 		tm copy = time;
 		return mktime(&copy);
 	}
-	/*void set_licence_plate(const std::string& license_plate)
-	{
-		this->license_plate = license_plate;
-	}*/
 	void set_violation_id(int id)
 	{
 		this->id = id;
@@ -148,12 +138,14 @@ std::istream& operator>>(std::istream& is, Crime& obj)
 	int id;
 	time_t timestamp;
 	std::string place;
-	is >> id >> timestamp;
-	std::getline(is, place, ',');
-	is.ignore();
-	obj.set_violation_id(id);
-	obj.set_timestamp(timestamp);
-	obj.set_place(place);
+	
+	if (is >> id >> timestamp)
+	{
+		std::getline(is, place, ',');
+		obj.set_violation_id(id);
+		obj.set_timestamp(timestamp);
+		obj.set_place(place);
+	}
 	return is;
 }
 void print(const std::map<std::string, std::list<Crime>>& base);
@@ -166,17 +158,21 @@ void main()
 	setlocale(LC_ALL, "");
 	/*Crime crime(1, "Ул. Ленина", "18:10 1.09.2024");
 	cout << crime << endl;*/
-	std::map<std::string, std::list<Crime>> base /*=
+
+	/*std::map<std::string, std::list<Crime>> base =
 	{
 		{"a777bb", {Crime(1, "Ул. Ленина", "18:10 1.09.2024"), Crime(2, "пл. Свободы", "12:25 20.08.2024")}},
 		{"a000bb", {Crime(6, "Ул. Космонавтов", "17:50 1.08.2024"), Crime(8, "ул. Космонавтов", "17:45 01.08.2024")}},
 		{"a001aa", {Crime(10, "Ул. Пролетарская", "21:50 1.08.2024"), Crime(9, "Ул. Пролетарская", "21:51 1.08.2024"), Crime(11, "Ул. Пролетарская", "21:51 1.08.2024"), Crime(12, "Ул. Пролетарская", "22:05 1.08.2024")}},
-	}*/;
+	};*/
 	
 	//print(base);
 	//load(base, "base.txt");
-	print(base);
-	auto crime_map = load("base.txt");
+	//print(base);
+
+	std::map<std::string, std::list<Crime>> crime_map = load("base.txt");
+
+	print(crime_map);
 }
 
 void save(const std::map<std::string, std::list<Crime>>& base, const std::string& file)
@@ -218,37 +214,36 @@ void save(const std::map<std::string, std::list<Crime>>& base, const std::string
 //		std::cerr << "Error: file is not found!" << endl;
 //	}
 //}
-std::map<std::string, std::list<Crime>> load(const std::string& file)
+
+std::map<std::string, std::list<Crime>> load(const std::string& filename) 
 {
 	std::map<std::string, std::list<Crime>> base;
-	std::ifstream fin(file);
-	
-	if (fin.is_open())
+	std::ifstream fin(filename);
+
+	if (!fin.is_open()) 
 	{
-		while (!fin.eof())
+		std::cerr << "Не удалось открыть файл " << filename << "\n";
+		return base;
+	}
+
+	std::string line;
+	while (std::getline(fin, line)) // Цикл, который считывает файл построчно
+	{
+		std::stringstream ss(line);	
+		std::string license_plate;
+		ss >> license_plate;		//Извлекаем номер машины
+
+		std::list<Crime> crimes;    //Пустой список crimes для хранения нарушений
+
+		Crime crime(0, "", "");	    //Создаем временный объект
+
+		while (ss >> crime)		    //Цикл, который считывает из строки объекты типа Crime и добавляет их в список crimes
 		{
-			std::string license_plate;
-			std::getline(fin, license_plate);
-			
-			std::string crimes;
-			std::getline(fin, crimes);
-			std::stringstream ss(crimes);
-			std::getline(ss, crimes, ',');
-			
-				std::stringstream ss_crime(crimes);
-				Crime crime(0, "place", "00:00 01.01.2000");
-				ss_crime >> crime;
-				base[license_plate].push_back(crime);
-;			
-			
+			crimes.push_back(crime);
 		}
-		
-		fin.close();
+		base[license_plate] = crimes;
 	}
-	else
-	{
-		std::cerr << "Error: file not found" << endl;
-	}
+	fin.close();
 	return base;
 }
 
@@ -256,7 +251,7 @@ void print(const std::map<std::string, std::list<Crime>>& base)
 {
 	for (std::map<std::string, std::list<Crime>>::const_iterator map_it = base.begin(); map_it != base.end(); ++map_it)
 	{
-		cout << map_it->first << ":\n";
+		cout << map_it->first << "\n";
 		for (std::list<Crime>::const_iterator it = map_it->second.begin(); it != map_it->second.end(); ++it)
 		{
 			cout << "\t" << *it << endl;
