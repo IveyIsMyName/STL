@@ -56,7 +56,6 @@ public:
 	}
 	const std::string get_time()const
 	{
-		
 		const int SIZE = 256;
 		char formatted[SIZE]{};
 		strftime(formatted, SIZE, "%R %e.%m.%Y", &time);
@@ -258,4 +257,5 @@ void print(const std::map<std::string, std::list<Crime>>& base)
 		}
 		cout << delimiter << endl;
 	}
+	cout << "Number of plates: " << base.size() << endl;
 }
