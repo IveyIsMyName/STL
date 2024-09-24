@@ -1,4 +1,5 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
+#include <Windows.h>
 #include <iostream>
 #include <fstream>
 #include <conio.h>
@@ -7,6 +8,7 @@
 #include<string>
 #include<list>
 #include<sstream>
+#include<cstdlib>
 
 using std::cin;
 using std::cout;
@@ -20,18 +22,23 @@ using std::endl;
 #define UP_ARROW 72
 #define DOWN_ARROW 80
 
-const char* MENU_ITEMS[] =
-{
-	"1. Загрузить базу из файла",
-	"2. Сохранить базу в файл",
-	"3. Вывести базу на экран",
-	"4. Вывести информацию по номеру",
-	"5. Добавить нарушение",
-};
-//const std::map<int, std::string>MENU_ITEMS =
+//const char* MENU_ITEMS[] =
 //{
-//	{1, ""}
-//}
+//	"1. Загрузить базу из файла",
+//	"2. Сохранить базу в файл",
+//	"3. Вывести базу на экран",
+//	"4. Вывести информацию по номеру",
+//	"5. Добавить нарушение",
+//};
+const std::map<int, std::string>MENU_ITEMS =
+{
+	{1, "Загрузить базу из файла"},
+	{2, "Сохранить базу в файл"},
+	{3, "Вывести базу на экран"},
+	{4, "Вывести информацию по номеру"},
+	{5, "Добавить нарушение"},
+	{6, "Выход"},
+};
 const std::map<int, std::string> VIOLATIONS =
 {
 	{1, "Ремень безопасности"},
@@ -51,7 +58,7 @@ const std::map<int, std::string> VIOLATIONS =
 	{15, "Превышение максимальной нагрузки на ось"},
 	{16, "Перевозка ребенка без кресла"},
 };
-const int MENU_SIZE = sizeof(MENU_ITEMS) / sizeof(MENU_ITEMS[0]);
+//const int MENU_SIZE = sizeof(MENU_ITEMS) / sizeof(MENU_ITEMS[0]);
 
 class Crime
 {
@@ -167,6 +174,8 @@ std::istream& operator>>(std::istream& is, Crime& obj)
 }
 
 int menu();
+void print_by_number(const std::map<std::string, std::list<Crime>>& base);
+void add_crime(std::map<std::string, std::list<Crime>>& base);
 void print(const std::map<std::string, std::list<Crime>>& base);
 void save(const std::map<std::string, std::list<Crime>>& base, const std::string& file);
 //void load(std::map<std::string, std::list<Crime>>& base, const std::string file);
@@ -195,12 +204,18 @@ cout << crime << endl;*/
 
 	print(crime_map);
 #endif // LOAD_CHECK
-
+	std::map<std::string, std::list<Crime>> base = load("base.txt");
 	do
 	{
 		switch (menu())
 		{
-
+		case 0: return;
+		case 1: base = load("base.txt");	break;
+		case 2: save(base, "base.txt");		break;
+		case 3: print(base);				break;
+		case 4: print_by_number(base); break;
+		case 5: add_crime(base); break;
+		case 6: exit(0);
 		}
 	} while (true);
 }
@@ -211,27 +226,31 @@ int menu()
 	do
 	{
 		system("CLS");
-		for (int i = 0; i < MENU_SIZE; i++)
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		for (int i = 1; i <= MENU_ITEMS.size(); i++)
 		{
 			cout << (i == selected_item ? "[" : " ");
+			cout << i << ". ";
 			cout.width(32);
 			cout << std::left;
-			cout << MENU_ITEMS[i];
-			cout << (i == selected_item ? "]" : " ");
+			if (i == selected_item)SetConsoleTextAttribute(hConsole, 0x70);
+			cout << MENU_ITEMS.at(i);
+			SetConsoleTextAttribute(hConsole, 0x07);
+			cout << (i == selected_item ? "  ]" : " ");
 			cout << endl;
 		}
 		key = _getch();
+	
 		switch (key)
 		{
-		case UP_ARROW: 
-			if (selected_item > 0)selected_item--; break;
-		case DOWN_ARROW: 
-			if (selected_item < MENU_SIZE - 1) selected_item++; break;
-		case Enter: 
-			return selected_item + 1;
-		case Escape:
-			return 0;
+		case UP_ARROW:	 selected_item--; break;
+		case DOWN_ARROW: selected_item++; break;
+		case Enter:		 return selected_item;
+		case Escape:	 return 0;
 		}
+		if (selected_item == MENU_ITEMS.size() + 1)selected_item = 1;
+		if (selected_item == 0)selected_item = MENU_ITEMS.size();
+		system("CLS");
 	} while (key != Escape);
 	return 0;
 }
@@ -274,7 +293,36 @@ void save(const std::map<std::string, std::list<Crime>>& base, const std::string
 //		std::cerr << "Error: file is not found!" << endl;
 //	}
 //}
-
+void print_by_number(const std::map<std::string, std::list<Crime>>& base)
+{
+	std::string license_plate;
+	cout << "Введите номер машины: ";cin >> license_plate;
+	try
+	{
+		for (std::list<Crime>::const_iterator it = base.at(license_plate).begin(); it != base.at(license_plate).end(); ++it)
+		{
+			cout << "\t" << *it << endl;
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "Номера нет в базе" << endl;
+	}
+	system("PAUSE");
+}
+void add_crime(std::map<std::string, std::list<Crime>>& base)
+{
+	
+	int id;	
+	std::string licence_plate;
+	std::string place;	
+	std::string time;
+	cout << "Введите статью: "; cin >> id;
+	cout << "Введите номер машины: "; cin >> licence_plate;
+	cout << "Введите место нарушения:  "; std::getline(cin, place);
+	cout << "Введите время и дату нарушения:"; std::getline(cin, time); //cin >> time;
+	base[licence_plate].push_back(Crime(id, place, time));
+}
 std::map<std::string, std::list<Crime>> load(const std::string& filename) 
 {
 	std::map<std::string, std::list<Crime>> base;
@@ -319,4 +367,5 @@ void print(const std::map<std::string, std::list<Crime>>& base)
 		cout << delimiter << endl;
 	}
 	cout << "Number of plates: " << base.size() << endl;
+	system("PAUSE");
 }
