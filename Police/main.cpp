@@ -1,6 +1,7 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>
 #include <iostream>
+#include <string>
 #include <fstream>
 #include <conio.h>
 #include <map>
@@ -9,6 +10,7 @@
 #include<list>
 #include<sstream>
 #include<cstdlib>
+#include<vector>
 
 using std::cin;
 using std::cout;
@@ -174,6 +176,7 @@ std::istream& operator>>(std::istream& is, Crime& obj)
 }
 
 int menu();
+int menu(const std::map<int, std::string>& menu_items);
 void print_by_number(const std::map<std::string, std::list<Crime>>& base);
 void add_crime(std::map<std::string, std::list<Crime>>& base);
 void print(const std::map<std::string, std::list<Crime>>& base);
@@ -213,11 +216,67 @@ cout << crime << endl;*/
 		case 1: base = load("base.txt");	break;
 		case 2: save(base, "base.txt");		break;
 		case 3: print(base);				break;
-		case 4: print_by_number(base); break;
-		case 5: add_crime(base); break;
+		case 4: print_by_number(base);		break;
+		case 5: add_crime(base);			break;
 		case 6: exit(0);
 		}
 	} while (true);
+}
+int menu(const std::map<int, std::string>& MENU_ITEMS)
+{
+	int selected_item = 1;
+	char key;
+	int items_count = static_cast<int>(MENU_ITEMS.size());
+
+	// Мапа ключей и позиций для соответствия индексов
+	std::vector<int> keys;
+	for (const std::pair<const int, std::string>& item : MENU_ITEMS)
+	{
+		keys.push_back(item.first);
+	}
+
+	do
+	{
+		system("CLS");
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+		for (int i = 0; i < items_count; ++i)
+		{
+			int current_key = keys[i];
+			const std::string& item_name = MENU_ITEMS.at(current_key);
+
+			std::cout << (i + 1 == selected_item ? "[" : " ");
+			std::cout << current_key << ". ";
+			std::cout.width(32);
+			std::cout << std::left;
+
+			if (i + 1 == selected_item)
+				SetConsoleTextAttribute(hConsole, 0x70); 
+
+			std::cout << item_name;
+
+			SetConsoleTextAttribute(hConsole, 0x07);
+			std::cout << (i + 1 == selected_item ? " ]" : " ");
+			std::cout << std::endl;
+		}
+
+		key = _getch();
+
+		switch (key)
+		{
+		case UP_ARROW: selected_item--;   break;
+		case DOWN_ARROW: selected_item++; break;
+		case Enter: return keys[selected_item - 1]; 
+		case Escape: return 0;
+		default: break;
+		}
+
+		if (selected_item > items_count) selected_item = 1;
+		if (selected_item < 1) selected_item = items_count;
+		system("CLS");
+	} while (key != Escape);
+
+	return 0;
 }
 int menu()
 {
@@ -312,16 +371,23 @@ void print_by_number(const std::map<std::string, std::list<Crime>>& base)
 }
 void add_crime(std::map<std::string, std::list<Crime>>& base)
 {
-	
 	int id;	
 	std::string licence_plate;
 	std::string place;	
 	std::string time;
-	cout << "Введите статью: "; cin >> id;
+	cout << "Выберите нарушение из списка ниже: " << endl;
+	for (const std::pair<const int, std::string>& crime : VIOLATIONS)
+	{
+		cout << crime.first << ". " << crime.second << endl;
+	}
+	id = menu(VIOLATIONS);
+	//cout << "Введите статью: "; cin >> id; 
 	cout << "Введите номер машины: "; cin >> licence_plate;
+	cin.clear(); cin.ignore();
 	cout << "Введите место нарушения:  "; std::getline(cin, place);
-	cout << "Введите время и дату нарушения:"; std::getline(cin, time); //cin >> time;
+	cout << "Введите время и дату нарушения:"; std::getline(cin, time);
 	base[licence_plate].push_back(Crime(id, place, time));
+	system("PAUSE");
 }
 std::map<std::string, std::list<Crime>> load(const std::string& filename) 
 {
@@ -340,6 +406,7 @@ std::map<std::string, std::list<Crime>> load(const std::string& filename)
 		std::stringstream ss(line);	
 		std::string license_plate;
 		ss >> license_plate;		//Извлекаем номер машины
+		license_plate.erase(license_plate.find_last_of(':'));
 
 		std::list<Crime> crimes;    //Пустой список crimes для хранения нарушений
 
